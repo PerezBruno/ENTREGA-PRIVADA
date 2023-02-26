@@ -2,11 +2,18 @@ const express = require("express");
 
 const path = require ("path")
 
+const ProductManager = require("./ProductManager")
+
+const { Server } = require("socket.io")
+
+
 const productRoutes = require("./routes/product.routes")
 
 const cartsRoutes = require("./routes/carts.routes")
 
 const handlebars = require("express-handlebars")
+
+const productManager = new ProductManager("./products/productos.json");
 
 
 const BASE_PREFIX = "api";
@@ -21,19 +28,61 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+
 app.use(`/${BASE_PREFIX}/products` , productRoutes);
 app.use(`/${BASE_PREFIX}/carts` , cartsRoutes);
 
 //configuración de handlebars
+
 app.engine("handlebars", handlebars.engine());
 app.set("views", path.join(`${__dirname}/views`));
 app.set("view engine", "handlebars");
 
+app.use(express.static(__dirname + '/public'))
 
-  app.listen(PORT, () => {
-    console.log(`API corriendo en el puerto ${PORT}`);
-  });
-  
+
+
+let listaProducts = [];
+const cargarProd = async () => {
+  try {
+    listaProducts = await productManager.getProducts();
+  } catch (error) {
+    console.error("Error: not product found");
+  }
+};
+cargarProd();
+//rutas
+app.get("/realtimeproducts", async (req, res) =>
+  res.status(200).render("realTimeProducts")
+);
+
+app.get("/", async (req, res) => {
+  res.status(200).render("home", { products: listaProducts });
+});
+
+// configurando Socket.io
+
+const server = app.listen(PORT, ()=>{
+  console.log(`Escuchando en puerto ${PORT}`)
+})
+
+const io = new Server(server);
+
+
+io.on("connection", (socket) => {
+//  console.log("🚀 ~ file: app.js:73 ~ io.on ~ socket:", socket)
+  console.log("conectado")
+  	
+	})
+
+
+
+//***********************LLEGUE AL MINUTO 28 DEL VIDEO 3 ***********************/
+
+
+
+
+
 
 //Configurar e instalar handlebars - listo
 
