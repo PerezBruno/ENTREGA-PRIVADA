@@ -19,12 +19,12 @@ const newProd = e => {
 	form.reset();
 };
 
-const delProd = async e => socket.emit('delProd', e.target.id);
+const delProd = async e => socket.emit('delProd', Number(e.target.id));
 
 socket.on('products', products => {
 	const productsContainer = document.getElementById('products-container');
 	productsContainer.innerHTML = '';
-	for (const prod of products) {
+	for (const prod of products.reverse()) {
 		productsContainer.innerHTML += `
 			<div>
             	<h2>${prod.title}</h2>
@@ -40,4 +40,6 @@ socket.on('products', products => {
 });
 
 document.addEventListener('click', e => e.target.matches('.btn-del') && delProd(e));
+
+
 btnForm.addEventListener('click', newProd);
