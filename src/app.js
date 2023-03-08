@@ -17,8 +17,11 @@ const productRoutes = require("./routes/product.routes")
 
 const cartsRoutes = require("./routes/carts.routes")
 
+const chatRoutes = require("./routes/chat.routes")
+
+
 const handlebars = require("express-handlebars");
-const { DB_HOST, DB_PORT, DB_NAME, DB_CNN } = require("./config/config");
+const { DB_HOST, DB_PORT, DB_NAME, DB_CNN, PORT } = require("./config/config");
 
 const productManager = new ProductManager("./products/productos.json");
 
@@ -28,7 +31,7 @@ const BASE_PREFIX = "api";
 const uri = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
 
-const PORT = 8080;
+//const PORT = 8080;
 
 const app = express();
 
@@ -40,6 +43,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(`/${BASE_PREFIX}/products` , productRoutes);
 app.use(`/${BASE_PREFIX}/carts` , cartsRoutes);
+app.use(`/${BASE_PREFIX}/chat`, chatRoutes);
+
+
+
+
 
 //configuración de handlebars
 
@@ -60,7 +68,9 @@ const cargarProd = async () => {
   }
 };
 cargarProd();
-//rutas
+
+
+//rutas socket
 app.get("/realtimeproducts", async (req, res) =>
   res.status(200).render("realTimeProducts")
 );
