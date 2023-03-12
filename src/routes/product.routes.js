@@ -1,6 +1,6 @@
 const { Router } = require("express");
 
-const ProductManager = require("../../src/ProductManager")
+const ProductManager = require("../dao/managers/ProductManager")
 
 const productManager = new ProductManager("./products/productos.json")
 

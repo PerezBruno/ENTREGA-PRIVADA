@@ -2,7 +2,7 @@ const express = require("express");
 
 const path = require ("path")
 
-const ProductManager = require("./ProductManager")
+const ProductManager = require("./dao/managers/ProductManager")
 
 const { Server } = require("socket.io")
 
@@ -79,6 +79,10 @@ app.get("/", async (req, res) => {
   res.status(200).render("home", { products: listaProducts });
 });
 
+app.get("/chat", async (req, res)=>{
+  res.status(200).render("chat")
+})
+
 // configurando Socket.io
 
 const server = app.listen(PORT, ()=>{
@@ -88,6 +92,7 @@ const server = app.listen(PORT, ()=>{
 
 const io = new Server(server);
 
+const messages = [];
 
 io.on("connection", async (socket) => {
 //  console.log("🚀 ~ file: app.js:73 ~ io.on ~ socket:", socket)
@@ -99,8 +104,28 @@ io.on("connection", async (socket) => {
 	socket.on('addProd', async prod => await productManager.addProducts(prod));
 
 	socket.on('delProd', async id => await productManager.deleteProduct(id) && console.log(id));
+
+      //****canal de mensajes
+  socket.on("message", (data) => {
+    messages.push(data);
+    io.emit("messageLogs", messages);
+  })
+
+      //****canal de autenticación
+  socket.on("authenticated", (data) => {
+    socket.broadcast.emit("newUserConnected", data)
+    }
+  )
+
+    //canal de autenticación
+    socket.on("authenticated", (data) => {
+      socket.broadcast.emit("newUserConected", data)
+      
+    })
   	
 	})
+
+
 
 
   // ****** Configuración de mongoose *****
@@ -113,36 +138,3 @@ io.on("connection", async (socket) => {
   .catch((err) => {
     console.log("🚀 ~ file: app.js:20 ~ err:", err);
   });
-
-  // const configConnection = {
-  //   url: DB_CNN ?? `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`,
-  //   options: {
-  //     useNewUrlParser: true,
-  //     useUnifiedTopology: true,
-  //   },
-  // };
-
-  // const mongoDBconnection = async () => {
-  //   try {
-  //     await connect(configConnection.url, configConnection.options);
-  //     console.log(`=================================`);
-  //     console.log(
-  //       `======= URL: ${configConnection.url.substring(0, 20)} =======`
-  //     );
-  //     console.log(`=================================`);
-  //   } catch (error) {
-  //     console.log(
-  //       "🚀 ~ file: mongo.config.js:23 ~ mongoDBconnection ~ error:",
-  //       error
-  //     );
-  //     throw new Error(error);
-  //   }
-  // };
-
-
-
-
-  /********************************************************
-   * 
-   * base de datos conecta
-   */
